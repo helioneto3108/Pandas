@@ -108,3 +108,109 @@ df.groupby(by=["TP_ESCOLA"])[["NU_NOTA_MT", "NU_NOTA_CN"]].mean()
 df.groupby(by=["TP_ESCOLA", "TP_SEXO"])[["NU_NOTA_MT", "NU_NOTA_CN"]].mean().T
 
 # %%
+(
+    df.groupby(by=["TP_ESCOLA"])[["NU_NOTA_MT", "NU_NOTA_CN"]].agg(
+        {"NU_NOTA_MT": ["max", "mean"], "NU_NOTA_CN": ["min", "median"]}
+    )
+)
+
+# %%
+# Quais municipios possuem a maior quantidade de inscrito
+df.NO_MUNICIPIO_PROVA.value_counts()
+
+# %%
+# A media de cada municipio nas provas
+(
+    df.groupby(by=["NO_MUNICIPIO_PROVA"])[provas]
+    .mean()
+    .reset_index()
+    .rename(
+        columns={
+            "NO_MUNICIPIO_PROVA": "MUNICIPIO",
+            "NU_NOTA_CN": "Média_Ciencia_Natureza",
+            "NU_NOTA_CH": "Média_Ciencia_Humanas",
+            "NU_NOTA_LC": "Média_Linguagem_Codigo",
+            "NU_NOTA_MT": "Média_Matematica",
+            "NU_NOTA_REDACAO": "Média_Redação",
+        }
+    )
+    .sort_values(by=["Média_Matematica", "Média_Ciencia_Humanas"], ascending=False)
+)
+
+# %%
+df_visao_municipio = (
+    df.groupby(by=["NO_MUNICIPIO_PROVA", "CO_MUNICIPIO_PROVA"])[provas]
+    .mean()
+    .reset_index()
+    .rename(
+        columns={
+            "CO_MUNICIPIO_PROVA": "Cod_IBGE",
+            "NO_MUNICIPIO_PROVA": "MUNICIPIO",
+            "NU_NOTA_CN": "Média_Ciencia_Natureza",
+            "NU_NOTA_CH": "Média_Ciencia_Humanas",
+            "NU_NOTA_LC": "Média_Linguagem_Codigo",
+            "NU_NOTA_MT": "Média_Matematica",
+            "NU_NOTA_REDACAO": "Média_Redação",
+        }
+    )
+    .sort_values(by=["Média_Matematica", "Média_Ciencia_Humanas"], ascending=False)
+    .reset_index(
+        drop=True
+    )  # colocar drop true senão ele joga o index antigo para coluna
+)
+df_visao_municipio
+
+# %%
+df_quantidade_inscritos = (
+    df.groupby(by=["NO_MUNICIPIO_PROVA", "CO_MUNICIPIO_PROVA"], as_index=False)[
+        "NU_INSCRICAO"
+    ]
+    .count()
+    .rename(
+        columns={
+            "NO_MUNICIPIO_PROVA": "Município",
+            "CO_MUNICIPIO_PROVA": "Cod_IBGE",
+            "NU_INSCRICAO": "Quantidade_Inscritos",
+        }
+    )
+    .sort_values(by=["Quantidade_Inscritos"], ascending=False)
+    .reset_index(drop=True)
+)
+df_quantidade_inscritos
+
+# %%
+df_quantidade_inscritos["Percentual_Inscritos"] = (
+    df_quantidade_inscritos.Quantidade_Inscritos / df.shape[0] * 100
+)
+df_quantidade_inscritos
+
+# %%
+pd.merge(
+    df_visao_municipio,
+    df_quantidade_inscritos,
+    on="Cod_IBGE",
+    how="inner",
+)
+
+# %%
+df_municipios = pd.merge(
+    df_visao_municipio,
+    df_quantidade_inscritos,
+    on="Cod_IBGE",
+    how="inner",
+)
+df_municipios
+
+# %%
+df_municipios = pd.merge(
+    df_visao_municipio,
+    df_quantidade_inscritos.drop(
+        columns=["Município"]
+    ),  # Para não ter 2 colunas muncipio
+    on="Cod_IBGE",
+    how="inner",
+)
+df_municipios
+
+# %%
+df_visao_municipio.merge(df_quantidade_inscritos, how="inner")
