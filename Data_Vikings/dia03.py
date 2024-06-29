@@ -243,6 +243,9 @@ def tratar_dados(df):
     return df
 
 
+### define uma lista das provas que serão analisadas
+provas = ["MATEMATICA", "CIENCIAS_NATUREZA", "LINGUAGENS", "HUMANAS", "REDACAO"]
+
 # %%
 df_raw = pd.read_csv("data/dados_enem_2021_BA.csv")
 df_raw
@@ -259,4 +262,235 @@ df
 df = tratar_dados(df)
 df
 
+# %%
+df[provas]
+
+# %%
+# filtra os dados para a condição de Treineiro
+treineiro = df.query("TREINEIRO == 1")
+
+# %%
+# Criando o plot
+var_idade = "TP_FAIXA_ETARIA"
+
+fig, ax = plt.subplots(3, 2, figsize=(15, 12))
+# Titulo da figura
+fig.suptitle(
+    "Perfil etário dos inscritos no ENEM",
+    fontsize=20,  # Tamanho da fonte
+    fontweight="bold",
+)  # Estilo da fonte
+# Inserir um gráfio de hist no eixo 0,0
+ax[0, 0].hist(df[var_idade], bins=30)  # Bins é a quantidade de classe
+ax[0, 0].set(xlabel="Classe_Idade", ylabel="Frequência")
+ax[0, 0].set_title("Inscritos Gerais")
+# insere um histograma para a idade dos treineiros no eixo ax[0,1]
+ax[0, 1].hist(treineiro[var_idade], bins=30)
+# altera os labels do eix[0,1]
+ax[0, 1].set(xlabel="Classe_Idade", ylabel="Frequência")
+ax[0, 1].set_title("Treineiro")
+# distribuição da idade dos inscritos gerais no eixo ax[1,0] e altera os labels
+sns.distplot(df[var_idade], ax=ax[1, 0])
+ax[1, 0].set(xlabel="Idade", ylabel="Frequência", title="Inscritos gerais")
+# distribuição da idade dos treineiros nos eixo ax[1,1] e altera os labels
+sns.distplot(treineiro[var_idade], ax=ax[1, 1])
+ax[1, 1].set(xlabel="Idade", ylabel="Frequência", title="Treineiro")
+# boxplot da idade no eixo ax[2,0] e altera os labels
+sns.boxplot(data=df, x=var_idade, ax=ax[2, 0])
+ax[2, 0].set(xlabel="Idade", title="Inscritos gerais")
+# boxplot da idade no eixo ax[2,1] e altera os labels
+sns.boxplot(data=treineiro, x=var_idade, ax=ax[2, 1])
+ax[2, 1].set(xlabel="Idade", title="Treineiro")
+plt.tight_layout(pad=4)
+
+# %%
+# Perfil de genero
+fig, ax = plt.subplots(figsize=(8, 5))
+sns.countplot(data=df, x="TP_SEXO", ax=ax)
+ax.set(xlabel="Sexo", ylabel="Quantidade", title="Distribuição de gênero")
+
+# %%
+fig, ax = plt.subplots(1, 2, figsize=(10, 6))
+sns.countplot(data=df, y="TP_ESTADO_CIVIL", ax=ax[0])
+sns.countplot(data=df, y="TP_ESTADO_CIVIL", hue="TP_SEXO", ax=ax[1])
+ax[0].set(ylabel="Estado Civil", xlabel="Quantidade", title="Estado civil")
+ax[1].set(ylabel="Estado Civil", xlabel="Quantidade", title="Estado civil por gênero")
+ax[1].legend(title="Gênero")
+fig.suptitle("Estado civil dos inscritos")
+fig.tight_layout(pad=4)
+
+# %%
+# Cor, raça e nacionalidade
+gerar_painel_barra(
+    df,
+    "TP_COR_RACA",
+    "TP_SEXO",
+    title="Perfil de cor e raça dos inscritos",
+    title_subplot_1="Cor/raça",
+    title_subplot_2="Cor/raça por gênero",
+    legend_subplot_2="Gênero",
+    ylabel="Cor/raça",
+)
+
+# %%
+# Analise univariada das provas
+### define uma lista das provas que serão analisadas
+univariate_analysis(provas, data=df)
+
+# %%
+# Mapa de calor das provas
+fig, ax = plt.subplots()
+# Fazendo o calculo de correlação entre as provas
+cor_provas = df[provas].corr()
+# Plotando o mapa de calor com as correlações
+sns.heatmap(cor_provas, annot=True, cmap="Blues", ax=ax, fmt=".2f")
+
+# %%
+fig, ax = plt.subplots(figsize=(10, 10))
+sns.boxplot(data=df[provas], ax=ax)
+
+# %%
+renda_ordenada = df["renda_mensal_familiar"].unique()
+renda_ordenada.sort()
+boxplot_por_filtro("renda_mensal_familiar", df, renda_ordenada)
+
+# %%
+df_visao_municipio = (
+    df_raw.query("NU_NOTA_MT != 0 ")
+    .groupby(by=["NO_MUNICIPIO_PROVA", "CO_MUNICIPIO_PROVA"], as_index=False)[
+        "NU_NOTA_MT"
+    ]
+    .agg([np.min, np.mean, np.median, np.max])
+    .reset_index(drop=False)
+    .rename(
+        columns={
+            "CO_MUNICIPIO_PROVA": "COD_IBGE",
+            "NO_MUNICIPIO_PROVA": "Município",
+            "min": "Mínimo_MT",
+            "mean": "Média_MT",
+            "median": "Mediana_MT",
+            "max": "Máximo_MT",
+        }
+    )
+    .sort_values(by=["Máximo_MT", "Média_MT", "Mediana_MT"], ascending=False)
+    .reset_index(drop=True)
+)
+
+
+df_quantidade_inscritos = (
+    df_raw.groupby(by=["NO_MUNICIPIO_PROVA", "CO_MUNICIPIO_PROVA"], as_index=False)[
+        "NU_INSCRICAO"
+    ]
+    .count()
+    .rename(
+        columns={
+            "NO_MUNICIPIO_PROVA": "Município",
+            "CO_MUNICIPIO_PROVA": "COD_IBGE",
+            "NU_INSCRICAO": "Quantidade_inscritos",
+        }
+    )
+    .sort_values(by=["Quantidade_inscritos"], ascending=False)
+    .reset_index(drop=True)
+)
+
+total = df_quantidade_inscritos.Quantidade_inscritos.sum()
+
+df_quantidade_inscritos["Percentual_inscritos"] = (
+    df_quantidade_inscritos.Quantidade_inscritos / total * 100
+).round(2)
+
+df_quantidade_inscritos["NU_ANO"] = 2021
+
+df_municipio = pd.merge(
+    df_visao_municipio.drop(columns=["Município"]),
+    df_quantidade_inscritos,
+    on="COD_IBGE",
+    how="inner",
+)
+
+# %%
+(
+    df_municipio.nlargest(n=20, columns="Quantidade_inscritos")
+    .set_index("Município")["Quantidade_inscritos"]
+    .plot(kind="barh")
+)
+
+# %%
+# Analise espacial
+# municípios BA
+ba_muni = geobr.read_municipality(code_muni="BA", year=2010)
+
+# %%
+# plot
+fig, ax = plt.subplots(figsize=(5, 5), dpi=150)
+
+ba_muni.plot(facecolor="#2D3E50", edgecolor="#FEBF57", linewidth=0.3, ax=ax)
+
+ax.set_title("Municípios BA, 2010", fontsize=4)
+ax.axis("off")
+
+# %%
+ba_muni.head(1)
+
+# %%
+df_spatial_enem = ba_muni.merge(
+    df_municipio, left_on="code_muni", right_on="COD_IBGE", how="left"
+)
+
+# %%
+# verifica volumetria
+df_municipio.shape, ba_muni.shape, df_spatial_enem.shape
+
+# %%
+df_spatial_enem.isna().sum()
+
+# %%
+df_spatial_enem = df_spatial_enem.fillna(-999)
+
+# %%
+df_spatial_enem.isna().sum()
+
+# %%
+plt.rcParams.update({"font.size": 5})
+
+fig, ax = plt.subplots(figsize=(4, 4), dpi=150)
+
+df_spatial_enem.plot(
+    column="Quantidade_inscritos",
+    cmap="Blues",
+    legend=True,
+    edgecolor="gray",
+    linewidth=0.3,
+    legend_kwds={
+        "label": "Quantidade de inscritos",
+        "orientation": "vertical",
+        "shrink": 0.3,
+    },
+    ax=ax,
+)
+
+ax.set_title("Inscritos por município no ENEM - BA, 2021")
+ax.axis("off")
+
+# %%
+plt.rcParams.update({"font.size": 5})
+
+fig, ax = plt.subplots(figsize=(4, 4), dpi=150)
+
+df_spatial_enem.plot(
+    column="Máximo_MT",
+    cmap="Blues",
+    legend=True,
+    edgecolor="gray",
+    linewidth=0.3,
+    legend_kwds={
+        "label": "Quantidade de inscritos",
+        "orientation": "vertical",
+        "shrink": 0.3,
+    },
+    ax=ax,
+)
+
+ax.set_title("Inscritos por município no ENEM - BA, 2021")
+ax.axis("off")
 # %%
