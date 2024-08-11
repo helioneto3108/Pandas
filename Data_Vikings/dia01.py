@@ -28,6 +28,21 @@ df.info(memory_usage="deep")
 df.columns
 
 # %%
+# Verificando os tipos das colunas
+df.dtypes
+
+# %%
+df.dtypes == "object"
+
+# %%
+# Trazendo so as colunas de objeto
+df.select_dtypes(include=object)
+
+# %%
+# Trazendo so as colunas de objeto
+df.select_dtypes(include=object).columns
+
+# %%
 df.isna().sum()
 
 # %%
@@ -44,11 +59,19 @@ df.describe()
 df.describe().transpose()
 
 # %%
-df.describe().T
+# Outro jeito de escrever
+df.describe().T[26:30]
+
+# %%
+# Fazendo os describe somente das notas
+df.describe().T.iloc[list(range(26, 30)) + [37]]
 
 # %%
 # Quantidade de valores unicos
 df.nunique().sort_values()
+
+# %%
+df.nunique().sort_values(ascending=False)
 
 # %%
 # Distribuição de frequencia do tipo de escola
@@ -60,6 +83,7 @@ df["TP_ESCOLA"].value_counts()
 df.loc[:, "TP_ESCOLA"]
 
 # %%
+# Outro jeito de puxar a coluna
 df["TP_ESCOLA"]
 
 # %%
@@ -123,6 +147,10 @@ df.query('(TP_SEXO == "M") | (IN_TREINEIRO == 1)').sample(5)
 df.TP_SEXO == "M"
 
 # %%
+# Fazendo um filtro com essa mascara
+df[df["TP_SEXO"] == "M"]
+
+# %%
 # Negação
 df.NO_MUNICIPIO_PROVA.isin(["Itabuna", "Salvador"])
 
@@ -135,9 +163,23 @@ df[~(df.NO_MUNICIPIO_PROVA.isin(["Itabuna", "Salvador"]))]
 # Ele irá pegar quem não mora em Itabuna, Salvador
 
 # %%
+# Outra maneira de escrever a condição
+df[df["NO_MUNICIPIO_PROVA"].isin(["Itabuna", "Salvador"])]
+
+# %%
+# Outra maneira de escrever a condição negando
+df[~(df["NO_MUNICIPIO_PROVA"].isin(["Itabuna", "Salvador"]))]
+
+# %%
 # Visualização de dados
 # Pegando as colunas de notas e tirando a parte de redação 'comp'
 df.columns[df.columns.str.contains("NOTA")]
+
+# %%
+# Para entender o que está acontecendo no comando acima
+df.columns.str.contains("INSCRICAO")
+# Com essa linha eu crio uma mascara booleana no meu array e seu
+# E se eu colocar dentro de um df.colums eu vou fazer um filtro
 
 # %%
 provas = df.columns[
@@ -172,6 +214,22 @@ plt.ylabel("Quantidade")
     .rename(columns={"NO_MUNICIPIO_PROVA": "Município", "count": "Quantidade"})
     .set_index("Município")
     .plot(kind="barh")
+)
+
+
+# %%
+(
+    df["NO_MUNICIPIO_PROVA"]
+    .value_counts()
+    .nlargest(n=15)
+    .plot(
+        kind="barh",
+        color="red",
+        legend=False,
+        xlabel="Quantidade",
+        ylabel="Município",
+        title="Top 15 municípios baíanos com maior quantidade de inscritos no enem 2021",
+    )
 )
 
 # %%
@@ -209,6 +267,10 @@ plt.ylabel("Quantidade")
 
 # %%
 df.TP_ESCOLA.map({1: "Não respondeu", 2: "Públcia", 3: "Privada"})
+
+# %%
+# Outro jeito de fazer
+df["TP_ESCOLA"].map({1: "Não respondeu", 2: "Pública", 3: "Privada"})
 
 # %%
 (
@@ -262,9 +324,13 @@ df.NU_NOTA_MT.plot(kind="kde", color="orange")
         color="k",
         ylabel="Média em Matemática",
         title="Nota média em Matemática por municípios",
-        # ylim    = [520, 545]
+        # ylim    = [520, 545] -> para limitar o eixo y
     )
 )
+
+# %%
+(df.groupby(by=["NO_MUNICIPIO_PROVA"]).agg({"NU_NOTA_MT": np.mean}).reset_index())
+
 # %%
 # Ordenação
 # Pegando um subset com 10 amostras aleatorias
@@ -284,6 +350,15 @@ df_subset.sort_values(by="NU_NOTA_MT", ascending=False, na_position="last")
 # Exercicio: pegar as 10 melhores notas de matematica de salvador
 df_salvador_top10 = df.query('NO_MUNICIPIO_PROVA == "Salvador"')[id_candidato + provas]
 df_salvador_top10
+
+# %%
+# Outro jeito de fazer
+# Vale lembrar que quando coloco '()' e como se fosse uma linha
+(
+    df[df["NO_MUNICIPIO_PROVA"] == "Salvador"][
+        id_candidato + provas + ["NO_MUNICIPIO_PROVA"]
+    ]
+)
 
 # %%
 df_salvador_top10.sort_values(by=["NU_NOTA_MT"], ascending=False)[:11]
