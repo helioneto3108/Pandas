@@ -105,13 +105,13 @@ df.groupby(by=["TP_ESCOLA"])[["NU_NOTA_MT", "NU_NOTA_CN"]].mean()
 )
 
 # %%
-df.groupby(by=["TP_ESCOLA", "TP_SEXO"])[["NU_NOTA_MT", "NU_NOTA_CN"]].mean().T
+(df.groupby(by=["TP_ESCOLA", "TP_SEXO"])[["NU_NOTA_MT", "NU_NOTA_CN"]].mean().T)
 
 # %%
 (
-    df.groupby(by=["TP_ESCOLA"])[["NU_NOTA_MT", "NU_NOTA_CN"]].agg(
-        {"NU_NOTA_MT": ["max", "mean"], "NU_NOTA_CN": ["min", "median"]}
-    )
+    df.groupby(by=["TP_ESCOLA"])[["NU_NOTA_MT", "NU_NOTA_CN"]]
+    .agg({"NU_NOTA_MT": ["max", "mean"], "NU_NOTA_CN": ["min", "median"]})
+    .rename(index={1: "Não informado", 2: "Pública", 3: "Privada"})
 )
 
 # %%
@@ -135,6 +135,7 @@ df.NO_MUNICIPIO_PROVA.value_counts()
         }
     )
     .sort_values(by=["Média_Matematica", "Média_Ciencia_Humanas"], ascending=False)
+    .reset_index(drop=True)
 )
 
 # %%
@@ -178,11 +179,22 @@ df_quantidade_inscritos = (
 )
 df_quantidade_inscritos
 
+# O as_index = false é para falar que não quer colocar aquelas colunas
+# como index e sim como um coluna mesmo
+
 # %%
 df_quantidade_inscritos["Percentual_Inscritos"] = (
     df_quantidade_inscritos.Quantidade_Inscritos / df.shape[0] * 100
 )
 df_quantidade_inscritos
+
+# %%
+# Verificar se estão todos os inscritos
+sum(df_quantidade_inscritos.Quantidade_Inscritos)
+
+# %%
+# Verificar se deu 100%
+sum(df_quantidade_inscritos.Percentual_Inscritos)
 
 # %%
 pd.merge(
@@ -214,3 +226,5 @@ df_municipios
 
 # %%
 df_visao_municipio.merge(df_quantidade_inscritos, how="inner")
+
+# %%

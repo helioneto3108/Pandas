@@ -88,7 +88,9 @@ colunas
 # %%
 # Ordenando as ordens da coluna em ordem alfabetica
 colunas.sort()
+colunas
 
+# %%
 df_customers = df_customers[colunas]
 df_customers
 

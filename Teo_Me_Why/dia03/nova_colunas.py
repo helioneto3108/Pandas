@@ -22,12 +22,18 @@ df
 df["Points_log"] = np.log(df["Points"])
 df
 
+
+# %%
+df["Name"]
+
 # %%
 # Fazendo de forma sequencial, ou seja, uma linha por vez. Isso é considerado demorado
 nomes_altas = list()
 for i in df["Name"]:
     nomes_altas.append(i.upper())
+nomes_altas
 
+# %%
 df["Nome_alta_sequencial"] = nomes_altas
 df
 
@@ -35,6 +41,9 @@ df
 # Fazendo de forma vetorial, ou seja, todas as linhas ao mesmo todo
 df["Nome_alta_vetorial"] = df["Name"].str.upper()
 df
+# Colocar o str é essencial, pois sem ele o df["Name"] seria
+# Considerado uma seria, com o .str ele é considerado string
+# E com isso sendo possivel a aplicação da função upper
 
 
 # %%

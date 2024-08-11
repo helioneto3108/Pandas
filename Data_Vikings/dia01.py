@@ -25,6 +25,10 @@ df.shape
 df.info(memory_usage="deep")
 
 # %%
+# Sem verificar o espaço em disco
+df.info()
+
+# %%
 df.columns
 
 # %%

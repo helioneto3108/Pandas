@@ -10,7 +10,7 @@ plt.plot(
     [15, 20, 99],
     [13, 90, 10],
     color="lime",
-    linewidth=3,  # Grossura da linha
+    linewidth=4,  # Grossura da linha
     linestyle="--",  # Tipo da linha (olhar mais na documentação)
 )
 # Adicionando mais uma linha

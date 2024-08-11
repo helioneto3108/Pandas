@@ -19,7 +19,7 @@ df["TP_SEXO"].value_counts() / df.shape[0] * 100
     .plot(
         kind="pie",
         title="distribuição de frequência do alunos pelo tipo de escola",
-        autopct="%.2f",
+        autopct="%.2f",  # Para colocar o valor no gráfico
     )
 )
 
