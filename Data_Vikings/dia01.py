@@ -57,6 +57,10 @@ df.isna().sum().sort_values(ascending=False)
 (df.isna().sum() / df.shape[0] * 100).sort_values(ascending=False)
 
 # %%
+# Outro jeito de fazer
+df.isna().mean().sort_values(ascending=False)
+
+# %%
 df.describe()
 
 # %%

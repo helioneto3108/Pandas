@@ -31,7 +31,9 @@ df_transacao.merge(df_user, how="inner", left_on="id_user", right_on="id")
 
 # %%
 df_merge = df_transacao.merge(df_user, how="left", left_on="id_user", right_on="id")
+df_merge
 
+# %%
 df_merge[df_merge["nome"].isna()]
 
 # %%

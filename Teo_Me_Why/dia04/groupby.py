@@ -9,6 +9,9 @@ df
 # Descobrindo quantos pontos do usuário (5f8fcbe0-6014-43f8-8b83-38cf2f4887b3) tem
 cond = df["IdCustomer"] == "5f8fcbe0-6014-43f8-8b83-38cf2f4887b3"
 df_user = df[cond]
+df_user
+
+# %%
 df_user["Points"].sum()
 
 # %%
@@ -32,6 +35,10 @@ df_summary.reset_index()
 # %%
 # Para ver a quantidade de valor unico em uma coluna
 df["IdCustomer"].unique().size
+
+# %%
+# Produto entre linhas e colunas, ou seja, quantidade de informacao
+df.size
 
 # %%
 df_agregadao = (

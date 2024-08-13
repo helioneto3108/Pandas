@@ -32,7 +32,7 @@ df.isna().mean()
 # Preenchendo os NAs com as medias
 df.fillna(
     {
-        "idade": df["idade"].mean(),
+        "idada": df["idade"].mean(),
         "renda": df["renda"].mean(),
     }
 )

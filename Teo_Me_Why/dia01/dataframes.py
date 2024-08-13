@@ -13,7 +13,6 @@ data = {
 data["idade"][0]
 
 # %%
-
 df = pd.DataFrame(data)
 df
 
