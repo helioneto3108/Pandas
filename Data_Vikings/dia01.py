@@ -155,6 +155,9 @@ df.query('(TP_SEXO == "M") | (IN_TREINEIRO == 1)').sample(5)
 df.TP_SEXO == "M"
 
 # %%
+df[df.TP_SEXO == "M"]
+
+# %%
 # Fazendo um filtro com essa mascara
 df[df["TP_SEXO"] == "M"]
 
